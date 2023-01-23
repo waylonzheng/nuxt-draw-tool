@@ -7,8 +7,14 @@
 
 <script setup lang="ts">
 import { Ref } from 'nuxt/dist/app/compat/vue-demi';
-import axios from 'axios';
-// import { ElButton } from 'element-plus';
+const route = useRoute();
+const {px, py} = toRaw(route.query)
+console.warn('px',px, py);
+type distance = string;
+const initDraw = (x:distance,y:distance) => {
+    ;
+    moveDom(addDom('p'),x,y)
+}
 
 const paper: Ref<any> = ref(null);
 const addDom = (dom: string) => {
@@ -17,8 +23,17 @@ const addDom = (dom: string) => {
     div.id = Math.random().toString();
     div.classList.add('ele');
     (paper.value as HTMLDivElement).appendChild(div);
-    watchDrag(div);
+    return div;
+    // watchDrag(div);
 };
+const moveDom = (dom:any,x:string,y:string) => {
+    console.warn('dddd',dom);
+    dom.style=`top:${y}px;left:${x}px;`
+    console.warn('d',dom.style);
+}
+onMounted(()=>{
+    initDraw(px as string,py as string);
+})
 const watchDrag = (drag: any): void => {
     if (!drag) return;
     let dragging = false,
@@ -66,11 +81,7 @@ const watchDrag = (drag: any): void => {
     };
 };
 const handleDraw = async () => {
-    const a = await axios({
-        method: 'get',
-        url: 'http://localhost:3005/drawing',
-    });
-    console.warn('aaaa', a);
+    const a = await useFetch('/api/drawing')
 };
 </script>
 
@@ -87,5 +98,6 @@ const handleDraw = async () => {
     height: 100px;
     position: absolute;
     border: 1px #b2b2b2 solid;
+    background-color: red;
 }
 </style>
