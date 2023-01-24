@@ -8,12 +8,14 @@ specifiers:
   '@vueuse/nuxt': ^9.9.0
   axios: ^1.2.3
   element-plus: ^2.2.27
+  js-base64: ^3.7.4
   nuxt: ^3.0.0
   puppeteer: ^19.6.0
   sass: ^1.57.1
 
 dependencies:
   axios: registry.npmmirror.com/axios/1.2.3
+  js-base64: registry.npmmirror.com/js-base64/3.7.4
   puppeteer: registry.npmmirror.com/puppeteer/19.6.0
 
 devDependencies:
@@ -3904,6 +3906,12 @@ packages:
     version: 1.16.2
     hasBin: true
     dev: true
+
+  registry.npmmirror.com/js-base64/3.7.4:
+    resolution: {integrity: sha512-wpM/wi20Tl+3ifTyi0RdDckS4YTD4Lf953mBRrpG8547T7hInHNPEj8+ck4gB8VDcGyeAWFK++Wb/fU1BeavKQ==, registry: http://111.230.199.61:6888/, tarball: https://registry.npmmirror.com/js-base64/-/js-base64-3.7.4.tgz}
+    name: js-base64
+    version: 3.7.4
+    dev: false
 
   registry.npmmirror.com/js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==, registry: http://111.230.199.61:6888/, tarball: https://registry.npmmirror.com/js-tokens/-/js-tokens-4.0.0.tgz}

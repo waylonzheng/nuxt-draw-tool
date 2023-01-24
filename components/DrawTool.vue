@@ -1,5 +1,7 @@
 <template>
+    <!-- 画布 -->
     <div ref="paper" class="paper" />
+    <p class="node-list">{{ nodeList }}</p>
     <el-button type="primary" @click="addDom('div')">增加块</el-button>
     <el-button type="primary" @click="addDom('input')">增加文字</el-button>
     <el-button type="primary" @click="handleDraw">生成图片</el-button>
@@ -7,60 +9,101 @@
 
 <script setup lang="ts">
 import { Ref } from 'nuxt/dist/app/compat/vue-demi';
-const route = useRoute();
-const {px, py} = toRaw(route.query)
-console.warn('px',px, py);
-type distance = string;
-const initDraw = (x:distance,y:distance) => {
-    ;
-    moveDom(addDom('p'),x,y)
-}
-
+import { encode, decode } from '@/common/utils/index';
+import { ElMessage } from 'element-plus';
+// 画布dom
 const paper: Ref<any> = ref(null);
-const addDom = (dom: string) => {
-    console.warn('dam', dom);
-    const div = document.createElement(dom);
-    div.id = Math.random().toString();
-    div.classList.add('ele');
-    (paper.value as HTMLDivElement).appendChild(div);
-    return div;
-    // watchDrag(div);
-};
-const moveDom = (dom:any,x:string,y:string) => {
-    console.warn('dddd',dom);
-    dom.style=`top:${y}px;left:${x}px;`
-    console.warn('d',dom.style);
+// 节点结构
+interface Node {
+    id: string;
+    type: domType;
+    x: string | number;
+    y: string | number;
 }
-onMounted(()=>{
-    initDraw(px as string,py as string);
-})
-const watchDrag = (drag: any): void => {
-    if (!drag) return;
-    let dragging = false,
-        offsetLeft = 0,
-        offsetTop = 0;
-    drag.onmousedown = (e: any) => {
+interface Props {
+    initData?: Node[]; // 后端直接访问页面通过这个参数绘图
+}
+const props = withDefaults(defineProps<Props>(), {
+    initData: () => [],
+});
+// 添加的所有dom
+const nodeList: Node[] = reactive(props.initData);
+type domType = 'div' | 'input';
+// 添加dom
+const addDom = (type: domType, id?: string) => {
+    const node: Node = {
+        type: type,
+        x: 0,
+        y: 0,
+        id: id ?? Math.round(Math.random() * 10000).toString(), // id为随机4位数
+    };
+    const ele = document.createElement(node.type);
+    ele.id = node.id;
+    ele.classList.add('ele');
+    nodeList.push(node);
+    (paper.value as HTMLDivElement).appendChild(ele);
+    watchDrag(node.id);
+};
+const moveDom = (id: string, x: string | number, y: string | number) => {
+    const ele: HTMLElement = document.getElementById(id) as HTMLElement;
+    ele.style.cssText = `${ele?.style.cssText}top:${y}px;left:${x}px`;
+};
+// 通过父组件传来的值进行绘图
+const initDraw = (list: Node[]) => {
+    list.forEach(item => {
+        addDom(item.type, item.id);
+        moveDom(item.id, item.x, item.y);
+    });
+};
+onMounted(() => {
+    initDraw(toRaw(props.initData));
+});
+let dragging = false,
+    offsetLeft = 0, // 点击位置距离dom左边距
+    offsetTop = 0; // 点击位置距离dom上边距
+const watchDrag = (id: string): void => {
+    const ele: HTMLElement = document.getElementById(id) as HTMLElement;
+    if (!ele) return;
+    // 元素按下事件
+    ele.onmousedown = (e: any) => {
         // e.preventDefault();
-        const { left, top } = drag.getBoundingClientRect(); // 获取悬浮按钮当前的top值和left值
+        const { left, top } = ele.getBoundingClientRect(); // 获取悬浮按钮当前的top值和left值
         offsetLeft = e.clientX - left; // 点击的x轴坐标距悬浮按钮左边的距离
 
         offsetTop = e.clientY - top; // 点击的y轴坐标距悬浮按钮顶部的距离
         dragging = true; // 拖动状态
     };
+    // 元素移动事件
     document.onmousemove = e => {
         // e.preventDefault();
         if (dragging) {
             // 只在拖动状态下处理
             // 获取悬浮按钮的节点信息
-            const { left, top, width, height } = drag.getBoundingClientRect();
+            const { left, top, width, height } = ele.getBoundingClientRect();
             // 可拖动的最大值，即悬浮按钮在右下角时的top值和left值
             const maxLeft = 375 - width,
                 maxTop = 667 - height;
             // 设置left值
-            if (left >= 0 && left <= maxLeft) drag.style.left = countPosition(e.clientX, offsetLeft, maxLeft) + 'px';
+            if (left >= 0 && left <= maxLeft) {
+                ele.style.left = countPosition(e.clientX, offsetLeft, maxLeft) + 'px';
+                nodeList.forEach(item => {
+                    if (item.id === id) {
+                        item.x = countPosition(e.clientX, offsetLeft, maxLeft);
+                    }
+                    return item;
+                });
+            }
 
             // 设置top值
-            if (top >= 0 && top <= maxTop) drag.style.top = countPosition(e.clientY, offsetTop, maxTop) + 'px';
+            if (top >= 0 && top <= maxTop) {
+                ele.style.top = countPosition(e.clientY, offsetTop, maxTop) + 'px';
+                nodeList.forEach(item => {
+                    if (item.id === id) {
+                        item.y = countPosition(e.clientY, offsetTop, maxTop);
+                    }
+                    return item;
+                });
+            }
         }
     };
     // 计算当前的left值或者top值，在0 - max之间
@@ -74,30 +117,46 @@ const watchDrag = (drag: any): void => {
             return maxSize - 1;
         }
     }
+    // 松开鼠标
     document.onmouseup = e => {
         e.preventDefault();
         dragging = false; // 取消拖动态
-        const { left, width } = drag.getBoundingClientRect();
     };
 };
 const handleDraw = async () => {
-    const a = await useFetch('/api/drawing')
+    const base64 = encode(toRaw(nodeList));
+    console.warn('base64', base64);
+    const a = await useFetch('/api/drawing', {
+        params: {
+            options: base64,
+        },
+    });
+    ElMessage({
+        message: '生成成功！',
+        type: 'success',
+    });
 };
 </script>
 
-<style>
+<style lang="scss">
+.node-list {
+    font-size: 16px;
+}
 .paper {
     overflow: hidden;
     width: 7.5rem;
     height: 13.34rem;
     border: 1px #b2b2b2 solid;
     position: relative;
-}
-.ele {
-    width: 100px;
-    height: 100px;
-    position: absolute;
-    border: 1px #b2b2b2 solid;
-    background-color: red;
+    > input {
+        text-align: center;
+    }
+    .ele {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        border: 1px #b2b2b2 solid;
+        background-color: red;
+    }
 }
 </style>

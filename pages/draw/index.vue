@@ -1,11 +1,11 @@
 <template>
     <div class="draw-page">
-        <DrawTool/>
+        <DrawTool />
     </div>
 </template>
 
-<script setup lang='ts'>
-import DrawTool from '../../components/DrawTool.vue'
+<script setup lang="ts">
+import DrawTool from '../../components/DrawTool.vue';
 </script>
 
 <style scoped>
