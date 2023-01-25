@@ -11,7 +11,7 @@ const __dirnameNew = path.dirname(__filenameNew);
 export default defineEventHandler(async event => {
     const query = event!.node!.req!.url!.split('options=')[1];
     const fileName = `${new Date().getTime()}.webp`;
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
     await page.goto(`http://localhost:3002/draw/${query}`, {
         waitUntil: 'networkidle0',
