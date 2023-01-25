@@ -1,4 +1,7 @@
 export default defineNuxtConfig({
+    app: {
+        baseURL: '/nuxt/',
+    },
     // css
     css: ['~/assets/style/index.scss'],
     // build
