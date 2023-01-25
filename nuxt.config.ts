@@ -1,8 +1,8 @@
 export default defineNuxtConfig({
     app: {
-        // baseURL: '/nuxt/',
-        buildAssetsDir: ':3000/nuxt/',
-        // cdnURL: 'http://43.136.79.140/nuxt/',
+        baseURL: '/',
+        // buildAssetsDir: ':3000/nuxt/',
+        cdnURL: 'http://43.136.79.140/nuxt/',
     },
     // css
     css: ['~/assets/style/index.scss'],
