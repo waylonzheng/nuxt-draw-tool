@@ -26,6 +26,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     initData: () => [],
 });
+const emit = defineEmits(['finish']);
 // 添加的所有dom
 const nodeList: Node[] = reactive(props.initData);
 type domType = 'div' | 'input';
@@ -126,11 +127,14 @@ const watchDrag = (id: string): void => {
 const handleDraw = async () => {
     const base64 = encode(toRaw(nodeList));
     console.warn('base64', base64);
-    const a = await useFetch('/api/drawing', {
+    const { data, error } = await useFetch('/api/drawing', {
         params: {
             options: base64,
         },
     });
+    if (error.value) return;
+    console.warn('data.value?.output', data.value?.output);
+    emit('finish', data.value?.output);
     ElMessage({
         message: '生成成功！',
         type: 'success',
