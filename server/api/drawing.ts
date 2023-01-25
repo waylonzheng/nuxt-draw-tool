@@ -13,7 +13,7 @@ export default defineEventHandler(async event => {
     const fileName = `${new Date().getTime()}.webp`;
     const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
-    await page.goto(`http://localhost:3002/draw/${query}`, {
+    await page.goto(`http://43.136.79.140/nuxt/draw/${query}`, {
         waitUntil: 'networkidle0',
     });
     await page.content();
