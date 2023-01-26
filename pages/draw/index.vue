@@ -4,7 +4,9 @@
             <DrawTool @finish="finish" />
         </div>
         <div class="draw-page-right">
-            <img :src="url" alt="👈先操作左边" />
+            <div>
+                <img :src="url" alt="👈先操作左边" />
+            </div>
         </div>
     </div>
 </template>
@@ -22,13 +24,20 @@ const finish = (value: string) => {
     height: 100vh;
     width: 100vw;
     display: flex;
+    align-items: flex-start;
     > div {
-        widows: 100%;
+        width: 100%;
     }
     &-right {
-        img {
-            width: 375px;
+        > div {
             height: 667px;
+            width: 375px;
+            background-color: white;
+            color: black;
+            img {
+                width: 100%;
+                height: 100%;
+            }
         }
     }
 }

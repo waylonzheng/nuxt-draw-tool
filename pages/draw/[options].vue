@@ -1,12 +1,6 @@
 <template>
     <div class="draw-page">
-        <div class="draw-page-left">
-            <DrawTool :initData="options" @finish="finish" />
-            {{ options }}
-        </div>
-        <div class="draw-page-right">
-            <img :src="url" alt="" />
-        </div>
+        <DrawTool :initData="options" @finish="finish" />
     </div>
 </template>
 
@@ -25,15 +19,5 @@ const finish = (value: string) => {
 .draw-page {
     height: 100vh;
     width: 100vw;
-    display: flex;
-    > div {
-        widows: 100%;
-    }
-    &-right {
-        img {
-            width: 375px;
-            height: 667px;
-        }
-    }
 }
 </style>
