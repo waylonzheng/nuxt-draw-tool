@@ -19,6 +19,7 @@ interface Node {
     type: domType;
     x: string | number;
     y: string | number;
+    content?: string;
 }
 interface Props {
     initData?: Node[]; // 后端直接访问页面通过这个参数绘图
@@ -27,16 +28,19 @@ const props = withDefaults(defineProps<Props>(), {
     initData: () => [],
 });
 const emit = defineEmits(['finish']);
+console.warn('p', props.initData);
 // 添加的所有dom
-const nodeList: Node[] = reactive(props.initData);
+const nodeList: Node[] = reactive([]);
+console.warn('nodelist', nodeList);
 type domType = 'div' | 'input';
-// 添加dom
-const addDom = (type: domType, id?: string) => {
+// 添加dom 服务端绘图需要传客户端绘图的id
+const addDom = (type: domType, id?: string, content?: string) => {
     const node: Node = {
         type: type,
         x: 0,
         y: 0,
         id: id ?? Math.round(Math.random() * 10000).toString(), // id为随机4位数
+        content: '',
     };
     const ele = document.createElement(node.type);
     ele.id = node.id;
@@ -44,15 +48,42 @@ const addDom = (type: domType, id?: string) => {
     nodeList.push(node);
     (paper.value as HTMLDivElement).appendChild(ele);
     watchDrag(node.id);
+    if (node.type === 'input') changeDomContent(node.id, content);
 };
 const moveDom = (id: string, x: string | number, y: string | number) => {
     const ele: HTMLElement = document.getElementById(id) as HTMLElement;
     ele.style.cssText = `${ele?.style.cssText}top:${y}px;left:${x}px`;
+    nodeList.forEach(item => {
+        if (item.id === id) {
+            item.x = x;
+            item.y = y;
+        }
+        return item;
+    });
+};
+const changeDomContent = (id: string, content?: string) => {
+    const input: HTMLInputElement = document.getElementById(id) as HTMLInputElement;
+    input.addEventListener('input', e => {
+        nodeList.forEach(item => {
+            if (item.id === id) {
+                item.content = e?.srcElement?.value;
+            }
+            return item;
+        });
+    });
+    content &&
+        nodeList.forEach(item => {
+            if (item.id === id) {
+                input.value = content;
+                item.content = content;
+            }
+            return item;
+        });
 };
 // 通过父组件传来的值进行绘图
 const initDraw = (list: Node[]) => {
-    list.forEach(item => {
-        addDom(item.type, item.id);
+    list.map(item => {
+        addDom(item.type, item.id, item.content);
         moveDom(item.id, item.x, item.y);
     });
 };
@@ -145,6 +176,8 @@ const handleDraw = async () => {
 <style lang="scss">
 .node-list {
     font-size: 16px;
+    display: block;
+    width: 375px;
 }
 .paper {
     overflow: hidden;
@@ -152,6 +185,8 @@ const handleDraw = async () => {
     height: 13.34rem;
     border: 1px #b2b2b2 solid;
     position: relative;
+    background-color: #ffffff;
+    color: #000000;
     > input {
         text-align: center;
     }
