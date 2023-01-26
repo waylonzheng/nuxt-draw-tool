@@ -3,7 +3,7 @@ import { copyFile, cp, unlink } from 'fs';
 import path from 'path';
 
 import { fileURLToPath } from 'url';
-const DEV = 1;
+const DEV = 0;
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
