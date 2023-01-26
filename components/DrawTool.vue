@@ -4,7 +4,7 @@
     <p class="node-list">{{ nodeList }}</p>
     <el-button type="primary" @click="addDom('div')">增加块</el-button>
     <el-button type="primary" @click="addDom('input')">增加文字</el-button>
-    <el-button type="primary" @click="handleDraw">生成图片</el-button>
+    <el-button type="primary" @click="handleDraw" :disabled="disabled">生成图片</el-button>
 </template>
 
 <script setup lang="ts">
@@ -28,10 +28,9 @@ const props = withDefaults(defineProps<Props>(), {
     initData: () => [],
 });
 const emit = defineEmits(['finish']);
-console.warn('p', props.initData);
 // 添加的所有dom
 const nodeList: Node[] = reactive([]);
-console.warn('nodelist', nodeList);
+const disabled: Ref<Boolean> = ref(false);
 type domType = 'div' | 'input';
 // 添加dom 服务端绘图需要传客户端绘图的id
 const addDom = (type: domType, id?: string, content?: string) => {
@@ -156,6 +155,7 @@ const watchDrag = (id: string): void => {
     };
 };
 const handleDraw = async () => {
+    disabled.value = true;
     const base64 = encode(toRaw(nodeList));
     console.warn('base64', base64);
     const { data, error } = await useFetch('/api/drawing', {
@@ -164,8 +164,8 @@ const handleDraw = async () => {
         },
     });
     if (error.value) return;
-    console.warn('data.value?.output', data.value?.output);
     emit('finish', data.value?.output);
+    disabled.value = false;
     ElMessage({
         message: '生成成功！',
         type: 'success',
